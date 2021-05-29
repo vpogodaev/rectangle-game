@@ -1,0 +1,7 @@
+.board {
+  width: fit-content;
+  margin: 0 auto;
+  margin-top: 100px;
+  display: grid;
+  grid-template: repeat(10, 1fr) / repeat(10, 1fr);  
+}
