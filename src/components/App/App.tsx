@@ -1,15 +1,10 @@
 import React from 'react';
-import Board from '../Board/Board';
-import Test from '../_test/Test';
-import Test2 from '../_test/Test2';
+import Game from '../Game/Game';
 import './app.css';
 
 export default function App() {
-  //return <Test/>
-  return <Test2/>
-  //return <Board width={15} height={10} />;
+  return <Game fieldWidth={12} fieldHeight={10}/>;
 }
-
 // function App() {
 //   return (
 //     <div className="App">
