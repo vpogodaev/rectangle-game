@@ -1,21 +1,31 @@
-import React from 'react';
-import { IPoint } from '../../models/common/interfaces';
+import React, { MouseEvent, MouseEventHandler } from 'react';
+import TCell from '../../models/types/TCell';
 import './styles.scss';
 
-export default function Cell({
-  point,
+type TCellProps = {
+  onMouseHover: (cell: TCell) => void;
+  onMouseClick: (cell: TCell) => void;
+  onMouseRightClickCell: (cell: TCell) => void;
+  cell: TCell;
+};
+
+export const Cell: React.FC<TCellProps> = ({
   onMouseHover,
   onMouseClick,
-}: {
-  point: IPoint;
-  onMouseHover: (point: IPoint) => void;
-  onMouseClick: (point: IPoint) => void;
-}) {
+  onMouseRightClickCell,
+  cell,
+}) => {
   const handleMouseHover = () => {
-    onMouseHover(point);
+    onMouseHover(cell);
   };
   const handleClick = () => {
-    onMouseClick(point);
+    onMouseClick(cell);
+  };
+  const handleMouseRightClick: React.MouseEventHandler<HTMLDivElement> = (
+    e: React.MouseEvent<HTMLDivElement, globalThis.MouseEvent>
+  ) => {
+    e.preventDefault();
+    onMouseRightClickCell(cell);
   };
 
   return (
@@ -23,6 +33,8 @@ export default function Cell({
       className="cell"
       onMouseEnter={handleMouseHover}
       onClick={handleClick}
+      onContextMenu={handleMouseRightClick}
+      key={`[${cell.point.x},${cell.point.y}]`}
     ></div>
   );
-}
+};

@@ -1,36 +1,53 @@
 import { useEffect, useState } from 'react';
-import { Players } from '../../models/common/enums';
+import { CellStatus } from '../../models/common/enums';
+//import { Players } from '../../models/common/enums';
 import { IPoint } from '../../models/common/interfaces';
+import TCell from '../../models/types/TCell';
+import TField from '../../models/types/TField';
 import TRectangle from '../../models/types/TRectangle';
-import Board from '../Board/Board';
-import Rectangle from '../Rectangle/Rectangle';
+import { Board } from '../Board/Board';
+import { Dices } from '../Dices/Dices';
+import { History } from '../History/History';
+import { Rectangle } from '../Rectangle/Rectangle';
 import './styles.scss';
 
 export default function Game({
-  fieldWidth,
-  fieldHeight,
+  width,
+  height,
 }: {
-  fieldWidth: number;
-  fieldHeight: number;
+  width: number;
+  height: number;
 }) {
-  const [curPlayer, setCurPlayer] = useState<Players>(Players.NONE);
+  //const [curPlayer, setCurPlayer] = useState<Players>(Players.NONE);
   const [rectangles, setRectangles] = useState<TRectangle[]>(
     new Array<TRectangle>()
   );
+  const [field, setField] = useState<TField>(new TField({ width, height }));
 
   useEffect(() => {
-    setRectangles([new TRectangle(3, 4, Players.PLAYER_1, { x: 1, y: 0 })]);
+    const rects = [
+      new TRectangle(2, 3, CellStatus.PLAYER_1, { x: 0, y: 0 }),
+      new TRectangle(2, 3, CellStatus.PLAYER_1, { x: 2, y: 0 })
+    ];
+    setRectangles(rects);
+    field.placeRectangle(rects[0]);
   }, []);
 
-  const handleMouseHoverCell = (point: IPoint) => {
-    console.log(point);
-  };
-  const handleMouseClickCell = (point: IPoint) => {
+  const handleMouseHoverCell = (cell: TCell) => {
     const newRectangles = rectangles.slice();
-    newRectangles[0].corner = point;
+    newRectangles[1].corner = cell.point;
     setRectangles(newRectangles);
-    console.log('handleMouseClickCell', point);
   };
+  const handleMouseClickCell = (cell: TCell) => {
+    console.log(field.canPlaceRectangle(rectangles[1]));
+  };
+  const handleMouseRightClickCell = (cell: TCell) => {
+    const newRectangles = rectangles.slice();
+    const tmp = newRectangles[1].width;
+    newRectangles[1].width = newRectangles[1].height;
+    newRectangles[1].height = tmp;
+    setRectangles(newRectangles);
+  }
 
   const drawRectangles = () => {
     const displayRectangles = new Array(rectangles?.length);
@@ -39,8 +56,7 @@ export default function Game({
       const corner = rec.corner ? rec.corner : { x: 0, y: 0 };
       displayRectangles[i] = (
         <Rectangle
-          width={rec.width}
-          height={rec.height}
+          size={{ width: rec.width, height: rec.height }}
           player={rec.player}
           corner={corner}
         />
@@ -51,15 +67,20 @@ export default function Game({
   };
 
   const displayRectangles = drawRectangles();
-  console.log('displayRectangles', displayRectangles);
 
   return (
-    <Board
-      width={fieldWidth}
-      height={fieldHeight}
-      children={displayRectangles}
-      onMouseHoverCell={handleMouseHoverCell}
-      onMouseClickCell={handleMouseClickCell}
-    ></Board>
+    <div className="game">
+      <div></div>
+      <Board
+        field={field}
+        onMouseHoverCell={handleMouseHoverCell}
+        onMouseClickCell={handleMouseClickCell}
+        onMouseRightClickCell={handleMouseRightClickCell}
+      >
+        {displayRectangles}
+      </Board>
+      <History />
+      <Dices />
+    </div>
   );
 }

@@ -1,41 +1,46 @@
-//import React, { useEffect, useState } from 'react';
-
-import { IPoint } from '../../models/common/interfaces';
-import Cell from '../Cell/Cell';
+import TCell from '../../models/types/TCell';
+import TField from '../../models/types/TField';
+import { Cell } from '../Cell/Cell';
 import './styles.scss';
 
-export default function Board({
-  width = 10,
-  height = 10,
+type TBoardProps = {
+  children?: React.ReactNode;
+  field: TField;
+  onMouseHoverCell: (cell: TCell) => void;
+  onMouseClickCell: (cell: TCell) => void;
+  onMouseRightClickCell: (cell: TCell) => void;
+};
+
+export const Board: React.FC<TBoardProps> = ({
   children = null,
+  field,
   onMouseHoverCell,
   onMouseClickCell,
-}: {
-  width: number;
-  height: number;
-  children?: any;
-  onMouseHoverCell: (point: IPoint) => void;
-  onMouseClickCell: (point: IPoint) => void;
-}) {
-  const square = width * height;
-  const backGroundCells = new Array(square);
+  onMouseRightClickCell,
+}): JSX.Element => {
+  const { width, height } = field;
 
-  const handleMouseHoverCell = (point: IPoint) => {
-    onMouseHoverCell(point);
+  const backGroundCells = new Array(width * height);
+
+  const handleMouseHoverCell = (cell: TCell) => {
+    onMouseHoverCell(cell);
   };
-  const handleMouseClickCell = (point: IPoint) => {
-    onMouseClickCell(point);
-    //console.log([point.x, point.y]);
+  const handleMouseClickCell = (cell: TCell) => {
+    onMouseClickCell(cell);
+  };
+  const handleMouseRightClickCell = (cell: TCell) => {
+    onMouseRightClickCell(cell);
   };
 
   let index = 0;
-  for (let i = 0; i < height; i++) {
-    for (let j = 0; j < width; j++) {
+  for (let i = 0; i < field.field.length; i++) {
+    for (let j = 0; j < field.field[0].length; j++) {
       backGroundCells[index++] = (
         <Cell
-          point={{ x: j, y: i }}
           onMouseHover={handleMouseHoverCell}
           onMouseClick={handleMouseClickCell}
+          onMouseRightClickCell={handleMouseRightClickCell}
+          cell={field.field[i][j]}
         />
       );
     }
@@ -55,4 +60,4 @@ export default function Board({
       </div>
     </>
   );
-}
+};

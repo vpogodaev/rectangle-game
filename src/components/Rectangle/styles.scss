@@ -9,6 +9,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 1;
   &_player1 {
     background-color: cyan;
     color: blue;
