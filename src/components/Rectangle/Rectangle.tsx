@@ -2,24 +2,36 @@ import React from 'react';
 import { CellStatus } from '../../models/common/enums';
 //import { Players } from '../../models/common/enums';
 import { IBox, IPoint } from '../../models/common/interfaces';
+import TRectangle from '../../models/types/TRectangle';
 
 import './styles.scss';
 
 type TRectangleProps = {
-  size: IBox;
-  player: CellStatus;
-  corner: IPoint;
+  // size: IBox;
+  // player: CellStatus;
+  // corner: IPoint;
+  rectangle: TRectangle;
 };
 
 export const Rectangle: React.FC<TRectangleProps> = ({
-  size,
-  player,
-  corner,
+  // size,
+  // player,
+  // corner,
+  rectangle,
 }) => {
-  const { x, y } = corner;
-  const { width, height } = size;
+  // убрать это
+  if (!rectangle.corner) {
+    return <div></div>;
+  }
+  const { x, y } = rectangle.corner;
+  const { width, height } = rectangle;
 
-  let className = `rectangle rectangle_${player}`;
+  console.log(rectangle.canBePlaced);
+  
+
+  let className = `rectangle rectangle_${rectangle.player} ${
+    rectangle.canBePlaced ? '' : 'rectangle_red'
+  }`;
   const style = {
     width: width * 50 + (width - 1) * 2,
     height: height * 50 + (height - 1) * 2,

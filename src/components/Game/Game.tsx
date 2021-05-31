@@ -27,38 +27,42 @@ export default function Game({
   useEffect(() => {
     const rects = [
       new TRectangle(2, 3, CellStatus.PLAYER_1, { x: 0, y: 0 }),
-      new TRectangle(2, 3, CellStatus.PLAYER_1, { x: 2, y: 0 })
+      new TRectangle(3, 2, CellStatus.PLAYER_2, { x: 0, y: 0 }),
+      new TRectangle(1, 3, CellStatus.PLAYER_1, { x: 2, y: 0 }),
     ];
     setRectangles(rects);
-    field.placeRectangle(rects[0]);
+    field.placeRectangle(rects[0], true);
+    field.placeRectangle(rects[1], true);
   }, []);
 
   const handleMouseHoverCell = (cell: TCell) => {
     const newRectangles = rectangles.slice();
-    newRectangles[1].corner = cell.point;
+    newRectangles[2].corner = cell.point;
+    newRectangles[2].canBePlaced = field.canPlaceRectangle(rectangles[2]);
     setRectangles(newRectangles);
   };
   const handleMouseClickCell = (cell: TCell) => {
-    console.log(field.canPlaceRectangle(rectangles[1]));
+    //console.log(field.canPlaceRectangle(rectangles[2]));
   };
   const handleMouseRightClickCell = (cell: TCell) => {
     const newRectangles = rectangles.slice();
-    const tmp = newRectangles[1].width;
-    newRectangles[1].width = newRectangles[1].height;
-    newRectangles[1].height = tmp;
+    const tmp = newRectangles[2].width;
+    newRectangles[2].width = newRectangles[2].height;
+    newRectangles[2].height = tmp;
     setRectangles(newRectangles);
-  }
+  };
 
   const drawRectangles = () => {
     const displayRectangles = new Array(rectangles?.length);
     for (let i = 0; i < rectangles.length; i++) {
-      const rec = rectangles[i];
-      const corner = rec.corner ? rec.corner : { x: 0, y: 0 };
+      //const rec = rectangles[i];
+      //const corner = rec.corner ? rec.corner : { x: 0, y: 0 };
       displayRectangles[i] = (
         <Rectangle
-          size={{ width: rec.width, height: rec.height }}
-          player={rec.player}
-          corner={corner}
+          // size={{ width: rec.width, height: rec.height }}
+          // player={rec.player}
+          // corner={corner}
+          rectangle={rectangles[i]}
         />
       );
     }
