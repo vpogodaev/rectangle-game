@@ -28,7 +28,7 @@ export default function Game({
     const rects = [
       new TRectangle(2, 3, CellStatus.PLAYER_1, { x: 0, y: 0 }),
       new TRectangle(3, 2, CellStatus.PLAYER_2, { x: 0, y: 0 }),
-      new TRectangle(1, 3, CellStatus.PLAYER_1, { x: 2, y: 0 }),
+      new TRectangle(2, 3, CellStatus.PLAYER_1, { x: 2, y: 0 }),
     ];
     setRectangles(rects);
     field.placeRectangle(rects[0], true);
@@ -36,7 +36,13 @@ export default function Game({
   }, []);
 
   const handleMouseHoverCell = (cell: TCell) => {
-    const newRectangles = rectangles.slice();
+    const rectangle = rectangles[2]; //todo: change
+
+    if (!field.canMoveRectangleToPoint(rectangle, cell.point)) {
+      return;
+    }
+
+    const newRectangles = rectangles.slice();    
     newRectangles[2].corner = cell.point;
     newRectangles[2].canBePlaced = field.canPlaceRectangle(rectangles[2]);
     setRectangles(newRectangles);
@@ -45,10 +51,14 @@ export default function Game({
     //console.log(field.canPlaceRectangle(rectangles[2]));
   };
   const handleMouseRightClickCell = (cell: TCell) => {
+    const rectangle = rectangles[2]; //todo: change
+
+    if (!field.canRollRectangle(rectangles[2])) {
+      return;
+    }
+
     const newRectangles = rectangles.slice();
-    const tmp = newRectangles[2].width;
-    newRectangles[2].width = newRectangles[2].height;
-    newRectangles[2].height = tmp;
+    newRectangles[2].roll();
     setRectangles(newRectangles);
   };
 

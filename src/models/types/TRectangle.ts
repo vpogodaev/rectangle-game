@@ -10,7 +10,7 @@ export default class TRectangle {
     width: number,
     height: number,
     player: CellStatus.PLAYER_1 | CellStatus.PLAYER_2,
-    corner: IPoint | null = null,
+    corner: IPoint = { x: 0, y: 0 },
     placed: boolean = false
   ) {
     this.width = width;
@@ -23,7 +23,7 @@ export default class TRectangle {
   width: number;
   height: number;
   /** left upper corner */
-  corner: IPoint | null;
+  corner: IPoint;
   player: CellStatus.PLAYER_1 | CellStatus.PLAYER_2;
   placed: boolean;
   canBePlaced: boolean;
@@ -36,5 +36,11 @@ export default class TRectangle {
       return false;
     }
     this.placed = true;
+  }
+
+  roll() {
+    const tmp = this.width;
+    this.width = this.height;
+    this.height = tmp;
   }
 }

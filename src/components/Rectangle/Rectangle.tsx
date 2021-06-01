@@ -26,8 +26,7 @@ export const Rectangle: React.FC<TRectangleProps> = ({
   const { x, y } = rectangle.corner;
   const { width, height } = rectangle;
 
-  console.log(rectangle.canBePlaced);
-  
+  //console.log(rectangle.canBePlaced);
 
   let className = `rectangle rectangle_${rectangle.player} ${
     rectangle.canBePlaced ? '' : 'rectangle_red'

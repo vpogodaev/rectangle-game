@@ -1,5 +1,5 @@
 import { CellStatus } from '../common/enums';
-import { IBox } from '../common/interfaces';
+import { IBox, IPoint } from '../common/interfaces';
 import TCell from './TCell';
 import TRectangle from './TRectangle';
 
@@ -60,8 +60,29 @@ export default class TField {
     }
 
     const aroundCells: TCell[] = this.getCellsAroundRectangle(rectangle);
-    
+
     if (aroundCells.some((c) => c.status === rectangle.player)) {
+      return true;
+    }
+
+    return false;
+  };
+
+  canMoveRectangleToPoint = (rectangle: TRectangle, point: IPoint): boolean => {
+    const { width, height } = rectangle;
+    const { x, y } = point;
+
+    if (width + x > this.width || height + y > this.height) {
+      return false;
+    }
+    return true;
+  };
+
+  canRollRectangle = (rectangle: TRectangle): boolean => {
+    // а можно копировать объект вместе со всеми методами?
+    const tmpRectangle = { ...rectangle, roll: rectangle.roll };
+    tmpRectangle.roll();
+    if (this.canMoveRectangleToPoint(tmpRectangle as TRectangle, tmpRectangle.corner)) {
       return true;
     }
 
@@ -118,13 +139,13 @@ export default class TField {
       if (x > 0 && !recCells.has(this.field[y][x - 1])) {
         aroundCells[i++] = this.field[y][x - 1];
       }
-      if (x < this.width && !recCells.has(this.field[y][x + 1])) {
+      if (x < this.width - 1 && !recCells.has(this.field[y][x + 1])) {
         aroundCells[i++] = this.field[y][x + 1];
       }
       if (y > 0 && !recCells.has(this.field[y - 1][x])) {
         aroundCells[i++] = this.field[y - 1][x];
       }
-      if (y < this.height && !recCells.has(this.field[y + 1][x])) {
+      if (y < this.height - 1 && !recCells.has(this.field[y + 1][x])) {
         aroundCells[i++] = this.field[y + 1][x];
       }
 
