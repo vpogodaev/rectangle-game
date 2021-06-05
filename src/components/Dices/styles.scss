@@ -1,0 +1,13 @@
+.dices-wrapper {
+  width: 200px;
+  //border: 1px black solid;
+  margin: 20px auto;
+  display: flex;
+  justify-content: space-between;
+}
+
+.roll-btn {
+  height: 30px;
+  width: 50px;
+  align-self: center;
+}

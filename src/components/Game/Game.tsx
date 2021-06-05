@@ -28,28 +28,44 @@ export default function Game({
     const rects = [
       new TRectangle(2, 3, CellStatus.PLAYER_1, { x: 0, y: 0 }),
       new TRectangle(3, 2, CellStatus.PLAYER_2, { x: 0, y: 0 }),
-      new TRectangle(2, 3, CellStatus.PLAYER_1, { x: 2, y: 0 }),
+      // new TRectangle(2, 4, CellStatus.PLAYER_1, { x: 2, y: 0 }),
+      // new TRectangle(8, 1, CellStatus.PLAYER_1, { x: 2, y: 0 }),
     ];
     setRectangles(rects);
+    // field.placeRectangle(rects[0], true);
     field.placeRectangle(rects[0], true);
     field.placeRectangle(rects[1], true);
+    // field.placeRectangle(rects[3]);
+
+    console.log(field.field);
   }, []);
 
   const handleMouseHoverCell = (cell: TCell) => {
+    return;
     const rectangle = rectangles[2]; //todo: change
 
-    if (!field.canMoveRectangleToPoint(rectangle, cell.point)) {
+    if (
+      rectangle.placed ||
+      !field.canMoveRectangleToPoint(rectangle, cell.point)
+    ) {
       return;
     }
 
-    const newRectangles = rectangles.slice();    
+    const newRectangles = rectangles.slice();
     newRectangles[2].corner = cell.point;
     newRectangles[2].canBePlaced = field.canPlaceRectangle(rectangles[2]);
     setRectangles(newRectangles);
   };
+
   const handleMouseClickCell = (cell: TCell) => {
+    if (field.canPlaceRectangle(rectangles[2])) {
+      const newRectangles = rectangles.slice();
+      newRectangles[2].place();
+      setRectangles(newRectangles);
+    }
     //console.log(field.canPlaceRectangle(rectangles[2]));
   };
+
   const handleMouseRightClickCell = (cell: TCell) => {
     const rectangle = rectangles[2]; //todo: change
 
@@ -82,6 +98,8 @@ export default function Game({
 
   const displayRectangles = drawRectangles();
 
+  // div-ы перед доской и костями для позиционирования в гриде
+  // потом посмотреть, как сделать это нормально
   return (
     <div className="game">
       <div></div>
@@ -94,7 +112,13 @@ export default function Game({
         {displayRectangles}
       </Board>
       <History />
-      <Dices />
+      <div></div>
+      <Dices
+        canRoll={true}
+        onDicesRolled={(d1, d2) => {
+          console.log([d1, d2]);
+        }}
+      />
     </div>
   );
 }

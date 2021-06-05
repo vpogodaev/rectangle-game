@@ -1,0 +1,54 @@
+@keyframes fadein {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.dice {
+  width: 50px;
+  height: 50px;
+  border: 2px black solid;
+  border-radius: 10%;
+  display: grid;
+  justify-items: center;
+  align-items: center;
+  grid-template-areas:
+    'd11  .   d13'
+    'd21  d22 d23'
+    'd31  .   d33';
+  animation: fadein 1s;
+  &__dot {
+    width: 10px;
+    height: 10px;
+    background: green;
+    border-radius: 100%;
+
+    &_d11 {
+      grid-area: d11;
+    }
+    &_d13 {
+      grid-area: d13;
+    }
+    &_d21 {
+      grid-area: d21;
+    }
+    &_d22 {
+      grid-area: d22;
+    }
+    &_d23 {
+      grid-area: d23;
+    }
+    &_d31 {
+      grid-area: d31;
+    }
+    &_d33 {
+      grid-area: d33;
+    }
+    &_hidden {
+      display: none;
+    }
+  }
+}
