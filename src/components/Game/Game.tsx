@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
-import { CellStatus } from '../../models/common/enums';
-//import { Players } from '../../models/common/enums';
-import { IPoint } from '../../models/common/interfaces';
+import { Players, GameStatus, DiceNum } from '../../models/common/enums';
+import { IScore } from '../../models/common/interfaces';
 import TCell from '../../models/types/TCell';
 import TField from '../../models/types/TField';
 import TRectangle from '../../models/types/TRectangle';
@@ -11,6 +10,8 @@ import { History } from '../History/History';
 import { Rectangle } from '../Rectangle/Rectangle';
 import './styles.scss';
 
+// 1. Необходимо определить очередность
+
 export default function Game({
   width,
   height,
@@ -18,64 +19,139 @@ export default function Game({
   width: number;
   height: number;
 }) {
-  //const [curPlayer, setCurPlayer] = useState<Players>(Players.NONE);
+  const [curPlayer, setCurPlayer] = useState<Players>(Players.NONE);
+  const [gameStatus, setGameStatus] = useState<GameStatus>(GameStatus.STOPPED); //useState<GameStatus>(GameStatus.STOPPED);
+  const [score, setScore] = useState<IScore>({ player1: 0, player2: 0 });
   const [rectangles, setRectangles] = useState<TRectangle[]>(
     new Array<TRectangle>()
   );
-  const [field, setField] = useState<TField>(new TField({ width, height }));
+  const [field, setField] = useState<TField>(new TField({ width, height }));  
 
+  // Необходимо кинуть кубики для определения очередности
   useEffect(() => {
-    const rects = [
-      new TRectangle(2, 3, CellStatus.PLAYER_1, { x: 0, y: 0 }),
-      new TRectangle(3, 2, CellStatus.PLAYER_2, { x: 0, y: 0 }),
-      // new TRectangle(2, 4, CellStatus.PLAYER_1, { x: 2, y: 0 }),
-      // new TRectangle(8, 1, CellStatus.PLAYER_1, { x: 2, y: 0 }),
-    ];
-    setRectangles(rects);
-    // field.placeRectangle(rects[0], true);
-    field.placeRectangle(rects[0], true);
-    field.placeRectangle(rects[1], true);
-    // field.placeRectangle(rects[3]);
-
-    console.log(field.field);
+    setCurPlayer(Players.PLAYER_1);
+    setGameStatus(GameStatus.PRIORITY_CHOOSE);
   }, []);
 
-  const handleMouseHoverCell = (cell: TCell) => {
-    return;
-    const rectangle = rectangles[2]; //todo: change
+  useEffect(() => {
+    // если выбор очередности
+    if (gameStatus === GameStatus.PRIORITY_CHOOSE) {
+      if (score.player1 === 0 && score.player2 === 0) {
+        return;
+      }
 
-    if (
-      rectangle.placed ||
-      !field.canMoveRectangleToPoint(rectangle, cell.point)
-    ) {
+      if (curPlayer === Players.PLAYER_1) {
+        // если бросал кубики первый игрок, то просто переключаем на второго
+        setCurPlayer(Players.PLAYER_2);
+      } else {
+        // если счет одинаковый, то нужно снова переключить на первого игрока
+        if (score.player1 === score.player2) {
+          setCurPlayer(Players.PLAYER_1);
+        } else {
+          // иначе меняем статус, ставим нужного игрока, обнуляем счет
+          if (score.player1 > score.player2) {
+            setCurPlayer(Players.PLAYER_1);
+          } else {
+            setCurPlayer(Players.PLAYER_2);
+          }
+          setGameStatus(GameStatus.DICE_ROLL);
+          setScore({ player1: 0, player2: 0 });
+        }
+      }
+    }
+  }, [score]);
+
+  const handlePriorityDicesRoll = (dice1: DiceNum, dice2: DiceNum) => {
+    console.log('handlePriorityDicesRoll');
+
+    if (gameStatus !== GameStatus.PRIORITY_CHOOSE) {
+      console.error(
+        'handlePriorityDiceRoll call in wrong game status',
+        gameStatus
+      );
       return;
     }
 
-    const newRectangles = rectangles.slice();
-    newRectangles[2].corner = cell.point;
-    newRectangles[2].canBePlaced = field.canPlaceRectangle(rectangles[2]);
-    setRectangles(newRectangles);
+    const dices = dice1 + dice2;
+    const newScore = { ...score };
+    if (curPlayer === Players.PLAYER_1) {
+      newScore.player1 = dices;
+    } else {
+      newScore.player2 = dices;
+    }
+
+    setScore(newScore);
+  };
+
+  const handleGameDicesRoll = (dice1: DiceNum, dice2: DiceNum) => {};
+
+  // const switchStatus = () => {
+  //   if (gameStatus === GameStatus.STOPPED) {
+  //     setGameStatus(GameStatus.PRIORITY_CHOOSE);
+  //     setDiceRollHandler(() => handlePriorityDiceRoll);
+
+  //     switchPlayers();
+  //   }
+  //   else if (gameStatus === GameStatus.DICE_ROLL) {
+  //     if (curPlayer === Players.PLAYER_1) {
+  //       switchPlayers();
+  //     } else {
+  //       if (score.player1 === score.player2) {
+  //         switchPlayers();
+  //       } else {
+  //         if (score.player1 > score.player2) {
+  //           setCurPlayer(Players.PLAYER_1);
+  //         } else
+  //       }
+  //       setGameStatus(GameStatus.DICE_ROLL);
+  //     }
+  //   }
+  // }
+
+  // const switchPlayers = () => {
+  //   if (gameStatus === GameStatus.PRIORITY_CHOOSE) {
+  //     if (curPlayer !== Players.PLAYER_1) {
+  //       setCurPlayer(Players.PLAYER_1);
+  //     } else {
+  //       setCurPlayer(Players.PLAYER_2);
+  //     }
+  //   }
+  // }
+
+  const handleMouseHoverCell = (cell: TCell) => {
+    return;
+    // const rectangle = rectangles[2]; //todo: change
+
+    // if (
+    //   rectangle.placed ||
+    //   !field.canMoveRectangleToPoint(rectangle, cell.point)
+    // ) {
+    //   return;
+    // }
+
+    // const newRectangles = rectangles.slice();
+    // newRectangles[2].corner = cell.point;
+    // newRectangles[2].canBePlaced = field.canPlaceRectangle(rectangles[2]);
+    // setRectangles(newRectangles);
   };
 
   const handleMouseClickCell = (cell: TCell) => {
-    if (field.canPlaceRectangle(rectangles[2])) {
-      const newRectangles = rectangles.slice();
-      newRectangles[2].place();
-      setRectangles(newRectangles);
-    }
+    // if (field.canPlaceRectangle(rectangles[2])) {
+    //   const newRectangles = rectangles.slice();
+    //   newRectangles[2].place();
+    //   setRectangles(newRectangles);
+    // }
     //console.log(field.canPlaceRectangle(rectangles[2]));
   };
 
   const handleMouseRightClickCell = (cell: TCell) => {
-    const rectangle = rectangles[2]; //todo: change
-
-    if (!field.canRollRectangle(rectangles[2])) {
-      return;
-    }
-
-    const newRectangles = rectangles.slice();
-    newRectangles[2].roll();
-    setRectangles(newRectangles);
+    // const rectangle = rectangles[2]; //todo: change
+    // if (!field.canRollRectangle(rectangles[2])) {
+    //   return;
+    // }
+    // const newRectangles = rectangles.slice();
+    // newRectangles[2].roll();
+    // setRectangles(newRectangles);
   };
 
   const drawRectangles = () => {
@@ -97,6 +173,8 @@ export default function Game({
   };
 
   const displayRectangles = drawRectangles();
+  
+  const onDicesRolledHandler = gameStatus === GameStatus.PRIORITY_CHOOSE ? handlePriorityDicesRoll : handleGameDicesRoll;
 
   // div-ы перед доской и костями для позиционирования в гриде
   // потом посмотреть, как сделать это нормально
@@ -111,14 +189,9 @@ export default function Game({
       >
         {displayRectangles}
       </Board>
-      <History />
+      <History gameStatus={gameStatus} curPlayer={curPlayer} score={score} />
       <div></div>
-      <Dices
-        canRoll={true}
-        onDicesRolled={(d1, d2) => {
-          console.log([d1, d2]);
-        }}
-      />
+      <Dices canRoll={true} onDicesRolled={onDicesRolledHandler} />
     </div>
   );
 }

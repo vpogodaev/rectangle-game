@@ -41,6 +41,7 @@ export const Board: React.FC<TBoardProps> = ({
           onMouseClick={handleMouseClickCell}
           onMouseRightClickCell={handleMouseRightClickCell}
           cell={field.field[i][j]}
+          key={`[${j},${i}]`}
         />
       );
     }

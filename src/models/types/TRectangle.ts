@@ -1,5 +1,4 @@
-//import { Players } from '../common/enums';
-import { CellStatus } from '../common/enums';
+import { Players } from '../common/enums';
 import { IPoint } from '../common/interfaces';
 
 export default class TRectangle {
@@ -9,7 +8,7 @@ export default class TRectangle {
   constructor(
     width: number,
     height: number,
-    player: CellStatus.PLAYER_1 | CellStatus.PLAYER_2,
+    player: Players.PLAYER_1 | Players.PLAYER_2,
     corner: IPoint = { x: 0, y: 0 },
     placed: boolean = false
   ) {
@@ -24,7 +23,7 @@ export default class TRectangle {
   height: number;
   /** left upper corner */
   corner: IPoint;
-  player: CellStatus.PLAYER_1 | CellStatus.PLAYER_2;
+  player: Players.PLAYER_1 | Players.PLAYER_2;
   placed: boolean;
   canBePlaced: boolean;
 

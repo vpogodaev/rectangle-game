@@ -1,15 +1,15 @@
-import { CellStatus } from '../common/enums';
+import { Players } from '../common/enums';
 import { IPoint } from '../common/interfaces';
 
 export default class TCell {
   /**
    *
    */
-  constructor(status: CellStatus, point: IPoint) {
+  constructor(status: Players, point: IPoint) {
     this.status = status;
     this.point = point;
   }
 
-  status: CellStatus;
+  status: Players;
   point: IPoint;
 }

@@ -1,11 +1,5 @@
-// export enum Players {
-//   NONE = "none",
-//   PLAYER_1 = 'player1',
-//   PLAYER_2 = 'player2',
-// }
-
-export enum CellStatus {
-  NONE = 'none',
+export enum Players {
+  NONE = "none",
   PLAYER_1 = 'player1',
   PLAYER_2 = 'player2',
 }
@@ -17,4 +11,12 @@ export enum DiceNum {
   _4 = 4,
   _5 = 5,
   _6 = 6,
+}
+
+export enum GameStatus {
+  STOPPED = 0,
+  PRIORITY_CHOOSE,
+  DICE_ROLL,
+  RECTANGLE_PLACE,
+  FINISHED,
 }

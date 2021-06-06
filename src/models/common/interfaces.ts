@@ -7,3 +7,8 @@ export declare interface IBox {
   width: number;
   height: number;
 }
+
+export declare interface IScore {
+  player1: number;
+  player2: number;
+}

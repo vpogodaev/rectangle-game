@@ -1,4 +1,4 @@
-import { CellStatus } from '../common/enums';
+import { Players } from '../common/enums';
 import { IBox, IPoint } from '../common/interfaces';
 import TCell from './TCell';
 import TRectangle from './TRectangle';
@@ -53,7 +53,7 @@ export default class TField {
 
     for (let i = y; i < (this.height > maxRH ? maxRH : this.height); i++) {
       for (let j = x; j < (this.width > maxRW ? maxRW : this.width); j++) {
-        if (this.field[i][j].status !== CellStatus.NONE) {
+        if (this.field[i][j].status !== Players.NONE) {
           return false;
         }
       }
@@ -114,7 +114,7 @@ export default class TField {
       return false;
     }
 
-    if (rectangle.player === CellStatus.PLAYER_1) {
+    if (rectangle.player === Players.PLAYER_1) {
       rectangle.corner = { x: 0, y: 0 };
     } else {
       const x = this.width - rectangle.width;
@@ -186,7 +186,7 @@ export default class TField {
     for (let i = 0; i < this.height; i++) {
       const row = new Array(this.width);
       for (let j = 0; j < this.width; j++) {
-        row[j] = new TCell(CellStatus.NONE, { x: j, y: i });
+        row[j] = new TCell(Players.NONE, { x: j, y: i });
       }
       field[i] = row;
     }

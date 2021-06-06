@@ -1,4 +1,4 @@
-import React, { MouseEvent, MouseEventHandler } from 'react';
+import React from 'react';
 import TCell from '../../models/types/TCell';
 import './styles.scss';
 
@@ -34,7 +34,6 @@ export const Cell: React.FC<TCellProps> = ({
       onMouseEnter={handleMouseHover}
       onClick={handleClick}
       onContextMenu={handleMouseRightClick}
-      key={`[${cell.point.x},${cell.point.y}]`}
     >
       {/* {cell.point.x},{cell.point.y} */}
     </div>

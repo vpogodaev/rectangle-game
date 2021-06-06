@@ -1,5 +1,14 @@
 .history {
-  width: 100px;
+  width: 200px;
   height: 100%;
-  background-color: burlywood;
+  background-color: blanchedalmond;
+  h2 {
+    text-align: center;
+    color: darkblue;
+  }
+}
+
+.score {
+  display: grid;
+  grid-template: 1fr 1fr / 1fr 1fr;
 }
