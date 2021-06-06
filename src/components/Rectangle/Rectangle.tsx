@@ -7,6 +7,8 @@ type TRectangleProps = {
   rectangle: TRectangle;
 };
 
+const square = 30;
+
 export const Rectangle: React.FC<TRectangleProps> = ({
   rectangle,
 }) => {
@@ -21,10 +23,10 @@ export const Rectangle: React.FC<TRectangleProps> = ({
     rectangle.canBePlaced ? '' : 'rectangle_red'
   }`;
   const style = {
-    width: width * 50 + (width - 1) * 2,
-    height: height * 50 + (height - 1) * 2,
-    top: 1 + y * 50 + y * 2,
-    left: 1 + x * 50 + x * 2,
+    width: width * square + (width - 1) * 2,
+    height: height * square + (height - 1) * 2,
+    top: 1 + y * square + y * 2,
+    left: 1 + x * square + x * 2,
   };
 
   return (

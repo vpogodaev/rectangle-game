@@ -25,7 +25,8 @@ export default function Game({
   const [rectangles, setRectangles] = useState<TRectangle[]>(
     new Array<TRectangle>()
   );
-  const [field, setField] = useState<TField>(new TField({ width, height }));  
+  const [field, setField] = useState<TField>(new TField({ width, height }));
+  const [curRectangle, setCurRectangle] = useState<TRectangle | null>(null);
 
   // Необходимо кинуть кубики для определения очередности
   useEffect(() => {
@@ -58,12 +59,15 @@ export default function Game({
           setScore({ player1: 0, player2: 0 });
         }
       }
+    } else if (gameStatus === GameStatus.RECTANGLE_PLACE) {
+      //todo: change
+      setCurPlayer(curPlayer === Players.PLAYER_1 ? Players.PLAYER_2 : Players.PLAYER_1);
+      setGameStatus(GameStatus.DICE_ROLL);
     }
+
   }, [score]);
 
   const handlePriorityDicesRoll = (dice1: DiceNum, dice2: DiceNum) => {
-    console.log('handlePriorityDicesRoll');
-
     if (gameStatus !== GameStatus.PRIORITY_CHOOSE) {
       console.error(
         'handlePriorityDiceRoll call in wrong game status',
@@ -83,98 +87,110 @@ export default function Game({
     setScore(newScore);
   };
 
-  const handleGameDicesRoll = (dice1: DiceNum, dice2: DiceNum) => {};
+  const handleGameDicesRoll = (dice1: DiceNum, dice2: DiceNum) => {
+    if (curPlayer === Players.NONE) {
+      console.error('handleGameDicesRoll cannot define player', curPlayer);
+      return;
+    }
 
-  // const switchStatus = () => {
-  //   if (gameStatus === GameStatus.STOPPED) {
-  //     setGameStatus(GameStatus.PRIORITY_CHOOSE);
-  //     setDiceRollHandler(() => handlePriorityDiceRoll);
-
-  //     switchPlayers();
-  //   }
-  //   else if (gameStatus === GameStatus.DICE_ROLL) {
-  //     if (curPlayer === Players.PLAYER_1) {
-  //       switchPlayers();
-  //     } else {
-  //       if (score.player1 === score.player2) {
-  //         switchPlayers();
-  //       } else {
-  //         if (score.player1 > score.player2) {
-  //           setCurPlayer(Players.PLAYER_1);
-  //         } else
-  //       }
-  //       setGameStatus(GameStatus.DICE_ROLL);
-  //     }
-  //   }
-  // }
-
-  // const switchPlayers = () => {
-  //   if (gameStatus === GameStatus.PRIORITY_CHOOSE) {
-  //     if (curPlayer !== Players.PLAYER_1) {
-  //       setCurPlayer(Players.PLAYER_1);
-  //     } else {
-  //       setCurPlayer(Players.PLAYER_2);
-  //     }
-  //   }
-  // }
+    const rectangle = new TRectangle(dice1, dice2, curPlayer);
+    setCurRectangle(rectangle);
+    setGameStatus(GameStatus.RECTANGLE_PLACE);
+  };
 
   const handleMouseHoverCell = (cell: TCell) => {
-    return;
-    // const rectangle = rectangles[2]; //todo: change
+    if (gameStatus !== GameStatus.RECTANGLE_PLACE) {
+      return;
+    }
 
-    // if (
-    //   rectangle.placed ||
-    //   !field.canMoveRectangleToPoint(rectangle, cell.point)
-    // ) {
-    //   return;
-    // }
+    if (!curRectangle) {
+      console.error('handleMouseHoverCell curRectangle is not set', curPlayer);
+      return;
+    }
 
-    // const newRectangles = rectangles.slice();
-    // newRectangles[2].corner = cell.point;
-    // newRectangles[2].canBePlaced = field.canPlaceRectangle(rectangles[2]);
-    // setRectangles(newRectangles);
+    if (
+      curRectangle.placed ||
+      !field.canMoveRectangleToPoint(curRectangle, cell.point)
+    ) {
+      return;
+    }
+
+    const newRectangles = rectangles.slice();
+    curRectangle.corner = cell.point;
+    curRectangle.canBePlaced = field.canPlaceRectangle(
+      curRectangle,
+      rectangles.length < 2
+    );
+    setRectangles(newRectangles);
   };
 
   const handleMouseClickCell = (cell: TCell) => {
-    // if (field.canPlaceRectangle(rectangles[2])) {
-    //   const newRectangles = rectangles.slice();
-    //   newRectangles[2].place();
-    //   setRectangles(newRectangles);
-    // }
-    //console.log(field.canPlaceRectangle(rectangles[2]));
+    if (!curRectangle) {
+      return;
+    }
+
+    if (field.canPlaceRectangle(curRectangle, rectangles.length < 2)) {
+      const newRectangles = rectangles.slice();
+      field.placeRectangle(curRectangle, rectangles.length < 2);
+      newRectangles.push(curRectangle);
+      setRectangles(newRectangles);
+      setCurRectangle(null);
+
+      let { player1, player2 } = score;
+      if (curPlayer === Players.PLAYER_1) {
+        player1 += curRectangle.width * curRectangle.height;
+      } else {
+        player2 += curRectangle.width * curRectangle.height;
+      }
+      setScore({ player1, player2 });
+    }
   };
 
   const handleMouseRightClickCell = (cell: TCell) => {
-    // const rectangle = rectangles[2]; //todo: change
-    // if (!field.canRollRectangle(rectangles[2])) {
-    //   return;
-    // }
-    // const newRectangles = rectangles.slice();
-    // newRectangles[2].roll();
-    // setRectangles(newRectangles);
+    if (!curRectangle) {
+      return;
+    }
+
+    if (!field.canRollRectangle(curRectangle)) {
+      return;
+    }
+
+    const { width, height, player, corner, placed } = curRectangle;
+    const newRectangle = new TRectangle(width, height, player, corner, placed);
+    newRectangle.roll();
+
+    setCurRectangle(newRectangle);
   };
 
   const drawRectangles = () => {
+    const getDrawableRectangle = (r: TRectangle, k: string) => (
+      <Rectangle rectangle={r} key={k} />
+    );
+
     const displayRectangles = new Array(rectangles?.length);
     for (let i = 0; i < rectangles.length; i++) {
-      //const rec = rectangles[i];
-      //const corner = rec.corner ? rec.corner : { x: 0, y: 0 };
-      displayRectangles[i] = (
-        <Rectangle
-          // size={{ width: rec.width, height: rec.height }}
-          // player={rec.player}
-          // corner={corner}
-          rectangle={rectangles[i]}
-        />
-      );
+      displayRectangles[i] = getDrawableRectangle(rectangles[i], `r-${i}`);
+    }
+
+    if (curRectangle) {
+      displayRectangles.push(getDrawableRectangle(curRectangle, 'r-tmp'));
     }
 
     return displayRectangles;
   };
 
   const displayRectangles = drawRectangles();
-  
-  const onDicesRolledHandler = gameStatus === GameStatus.PRIORITY_CHOOSE ? handlePriorityDicesRoll : handleGameDicesRoll;
+
+  const onDicesRolledHandler =
+    gameStatus === GameStatus.PRIORITY_CHOOSE
+      ? handlePriorityDicesRoll
+      : handleGameDicesRoll;
+  const canRoll =
+    gameStatus === GameStatus.PRIORITY_CHOOSE
+      ? true
+      : gameStatus === GameStatus.DICE_ROLL
+      ? true
+      : false;
 
   // div-ы перед доской и костями для позиционирования в гриде
   // потом посмотреть, как сделать это нормально
@@ -191,7 +207,7 @@ export default function Game({
       </Board>
       <History gameStatus={gameStatus} curPlayer={curPlayer} score={score} />
       <div></div>
-      <Dices canRoll={true} onDicesRolled={onDicesRolledHandler} />
+      <Dices canRoll={canRoll} onDicesRolled={onDicesRolledHandler} />
     </div>
   );
 }

@@ -17,7 +17,7 @@ export default class TRectangle {
     this.corner = corner;
     this.player = player;
     this.placed = placed;
-    this.canBePlaced = true;
+    this.canBePlaced = false;
   }
   width: number;
   height: number;

@@ -30,16 +30,20 @@ export default class TField {
 
     // нужна ли эта проверка, если предполагается, что до того как ставить, будет вызвана эта функция?
     // пускай пока будет, можно будет не уточнять снаружи перед вызовом
-    if (!this.canPlaceRectangle(rectangle)) {
+    if (!this.canPlaceRectangle(rectangle, first)) {
       return false;
     }
 
     this._placeRectangle(rectangle);
-
+    rectangle.place();
+    
     return true;
   };
 
-  canPlaceRectangle = (rectangle: TRectangle): boolean => {
+  canPlaceRectangle = (
+    rectangle: TRectangle,
+    first: boolean = false
+  ): boolean => {
     // todo: потом поменять условие
     if (!rectangle.corner || rectangle.placed) {
       return false;
@@ -47,6 +51,24 @@ export default class TField {
 
     const { x, y } = rectangle.corner;
     const { width, height } = rectangle;
+
+    if (first) {
+      if (rectangle.player === Players.PLAYER_1) {
+        if (this.field[0][0].status !== Players.NONE) {
+          console.error(
+            'canPlaceRectangle first player corner is taken',
+            this.field[0][0]
+          );
+          return false;
+        }
+        return x === 0 && y === 0;
+      } else {
+        const xToPlace = this.width - width;
+        const yToPlace = this.height - height;
+        
+        return x === xToPlace && y === yToPlace;
+      }
+    }
 
     const maxRH = height + y;
     const maxRW = width + x;
@@ -82,7 +104,12 @@ export default class TField {
     // а можно копировать объект вместе со всеми методами?
     const tmpRectangle = { ...rectangle, roll: rectangle.roll };
     tmpRectangle.roll();
-    if (this.canMoveRectangleToPoint(tmpRectangle as TRectangle, tmpRectangle.corner)) {
+    if (
+      this.canMoveRectangleToPoint(
+        tmpRectangle as TRectangle,
+        tmpRectangle.corner
+      )
+    ) {
       return true;
     }
 
