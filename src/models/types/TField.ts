@@ -5,9 +5,13 @@ import TRectangle from './TRectangle';
 
 export {};
 
+/**
+ * Игровое поле
+ */
 export default class TField {
   /**
    *
+   * @param size Размеры поля
    */
   constructor(size: IBox) {
     this.width = size.width;
@@ -15,17 +19,23 @@ export default class TField {
     this.field = this.initField();
   }
 
+  /** Ширина */
   width: number;
+  /** Высота */
   height: number;
-  field: TCell[][]; // нужно обращаться через [y][x]
+  /** Массив клеток. Обращаться через [y][x] */
+  field: TCell[][];
 
+  /**
+   * Расположить прямоугольник на поле
+   * @param rectangle Прямоугольник
+   * @param first Первый прямоугольник игрока или нет. TODO: это можно проверить и в самом классе, переделать
+   * @returns true - если удалось расположить, false - если не удалось
+   */
   placeRectangle = (rectangle: TRectangle, first: boolean = false): boolean => {
+    // Особый сценарий для первого
     if (first) {
       return this.placeFirstRectangle(rectangle);
-    }
-
-    if (!rectangle.corner) {
-      return false;
     }
 
     // нужна ли эта проверка, если предполагается, что до того как ставить, будет вызвана эта функция?
@@ -34,24 +44,36 @@ export default class TField {
       return false;
     }
 
+    // "Реальная" функция расположения
     this._placeRectangle(rectangle);
+    // Закрепляем сам прямоугольник
     rectangle.place();
-    
+
     return true;
   };
 
+  /**
+   * Можно ли расположить прямоугольник там, где он сейчас находится
+   * @param rectangle Прямоугольник
+   * @param first Первый прямоугольник игрока или нет. TODO: это можно проверить и в самом классе, переделать
+   * @returns true - можно, false - нельзя
+   */
   canPlaceRectangle = (
     rectangle: TRectangle,
     first: boolean = false
   ): boolean => {
-    // todo: потом поменять условие
-    if (!rectangle.corner || rectangle.placed) {
+    // todo: потом поменять условие?
+    if (rectangle.placed) {
       return false;
     }
 
+    // x, y -- левый верхний угол
     const { x, y } = rectangle.corner;
     const { width, height } = rectangle;
 
+    // Особая проверка для первого прямоугольника игрока.
+    // Для первого игрока всё просто, для второго нужно вычислить.
+    // todo: 1. либо убрать проверки у первого, либо добавить у второго 2. вынести?
     if (first) {
       if (rectangle.player === Players.PLAYER_1) {
         if (this.field[0][0].status !== Players.NONE) {
@@ -61,18 +83,21 @@ export default class TField {
           );
           return false;
         }
+
         return x === 0 && y === 0;
       } else {
         const xToPlace = this.width - width;
         const yToPlace = this.height - height;
-        
+
         return x === xToPlace && y === yToPlace;
       }
     }
 
+    // правый нижний угол
     const maxRH = height + y;
     const maxRW = width + x;
 
+    // Если вышли за рамки поля -- нельзя
     for (let i = y; i < (this.height > maxRH ? maxRH : this.height); i++) {
       for (let j = x; j < (this.width > maxRW ? maxRW : this.width); j++) {
         if (this.field[i][j].status !== Players.NONE) {
@@ -81,8 +106,8 @@ export default class TField {
       }
     }
 
+    // Берем клетки вокруг прямоугольника, там дожен быть этот же игрок
     const aroundCells: TCell[] = this.getCellsAroundRectangle(rectangle);
-
     if (aroundCells.some((c) => c.status === rectangle.player)) {
       return true;
     }
@@ -113,6 +138,50 @@ export default class TField {
       return true;
     }
 
+    return false;
+  };
+
+  hasFieldSpaceForRectangle = (
+    rectangle: TRectangle,
+    isFirst: boolean
+  ): boolean => {
+    const cellsToPlace: TCell[] = [];
+    const minHeight =
+      rectangle.height < rectangle.width ? rectangle.height : rectangle.width;
+    const minWidth =
+      rectangle.width < rectangle.height ? rectangle.width : rectangle.height;
+    this.field.forEach((row) => {
+      if (row[0].point.y + minHeight > this.height) {
+        return;
+      }
+      cellsToPlace.push(
+        ...row.filter(
+          (c) => c.status === Players.NONE && c.point.x + minWidth < this.width
+        )
+      );
+    });
+
+    const check = (r: TRectangle): boolean => {
+      // foreach не подходит, т.к. он не выходит из check'а
+      for (let i = 0; i < cellsToPlace.length; i++) {
+        r.moveTo(cellsToPlace[i].point);
+
+        if (this.canPlaceRectangle(r, isFirst)) {
+          return true;
+        }
+      }
+
+      return false;
+    };
+
+    const tmpRect = rectangle.copy();
+    if (check(tmpRect)) {
+      return true;
+    }
+    tmpRect.roll();
+    if (check(tmpRect)) {
+      return true;
+    }
     return false;
   };
 

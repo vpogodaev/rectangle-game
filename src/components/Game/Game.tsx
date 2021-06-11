@@ -6,7 +6,7 @@ import TField from '../../models/types/TField';
 import TRectangle from '../../models/types/TRectangle';
 import { Board } from '../Board/Board';
 import { Dices } from '../Dices/Dices';
-import { History } from '../History/History';
+import { Score } from '../Score/Score';
 import { Rectangle } from '../Rectangle/Rectangle';
 import './styles.scss';
 
@@ -27,11 +27,28 @@ export default function Game({
   );
   const [field, setField] = useState<TField>(new TField({ width, height }));
   const [curRectangle, setCurRectangle] = useState<TRectangle | null>(null);
+  const [canPass, setCanPass] = useState<boolean>(false);
 
   // Необходимо кинуть кубики для определения очередности
   useEffect(() => {
+    // prod
     setCurPlayer(Players.PLAYER_1);
     setGameStatus(GameStatus.PRIORITY_CHOOSE);
+
+    // test
+    // const rects = [
+    //   new TRectangle(2, 3, Players.PLAYER_1, { x: 0, y: 0 }),
+    //   new TRectangle(2, 3, Players.PLAYER_2, { x: 0, y: 0 }),
+    //   new TRectangle(4, 2, Players.PLAYER_1, { x: 2, y: 2 }),
+    //   new TRectangle(1, 3, Players.PLAYER_2, { x: 21, y: 15 }),
+    // ];
+    // setRectangles(rects);
+    // field.placeRectangle(rects[0], true);
+    // field.placeRectangle(rects[1], true);
+    // rects.slice(2).forEach((r) => field.placeRectangle(r));
+
+    // setCurPlayer(Players.PLAYER_1);
+    // setGameStatus(GameStatus.DICE_ROLL);
   }, []);
 
   useEffect(() => {
@@ -61,10 +78,11 @@ export default function Game({
       }
     } else if (gameStatus === GameStatus.RECTANGLE_PLACE) {
       //todo: change
-      setCurPlayer(curPlayer === Players.PLAYER_1 ? Players.PLAYER_2 : Players.PLAYER_1);
+      setCurPlayer(
+        curPlayer === Players.PLAYER_1 ? Players.PLAYER_2 : Players.PLAYER_1
+      );
       setGameStatus(GameStatus.DICE_ROLL);
     }
-
   }, [score]);
 
   const handlePriorityDicesRoll = (dice1: DiceNum, dice2: DiceNum) => {
@@ -96,6 +114,11 @@ export default function Game({
     const rectangle = new TRectangle(dice1, dice2, curPlayer);
     setCurRectangle(rectangle);
     setGameStatus(GameStatus.RECTANGLE_PLACE);
+    if (field.hasFieldSpaceForRectangle(rectangle, rectangles.length < 2)) {
+      setCanPass(false);
+    } else {
+      setCanPass(true);
+    }
   };
 
   const handleMouseHoverCell = (cell: TCell) => {
@@ -116,7 +139,7 @@ export default function Game({
     }
 
     const newRectangles = rectangles.slice();
-    curRectangle.corner = cell.point;
+    curRectangle.moveTo(cell.point);
     curRectangle.canBePlaced = field.canPlaceRectangle(
       curRectangle,
       rectangles.length < 2
@@ -162,6 +185,13 @@ export default function Game({
     setCurRectangle(newRectangle);
   };
 
+  const handlePassBtn = () => {
+    setCurPlayer(curPlayer === Players.PLAYER_1 ? Players.PLAYER_2 : Players.PLAYER_1);
+    setCurRectangle(null);
+    setGameStatus(GameStatus.DICE_ROLL)
+    setCanPass(false);
+  };
+
   const drawRectangles = () => {
     const getDrawableRectangle = (r: TRectangle, k: string) => (
       <Rectangle rectangle={r} key={k} />
@@ -205,9 +235,14 @@ export default function Game({
       >
         {displayRectangles}
       </Board>
-      <History gameStatus={gameStatus} curPlayer={curPlayer} score={score} />
+      <Score gameStatus={gameStatus} curPlayer={curPlayer} score={score} />
       <div></div>
       <Dices canRoll={canRoll} onDicesRolled={onDicesRolledHandler} />
+      <div className="pass-btn">
+        <button onClick={handlePassBtn} disabled={!canPass}>
+          Pass
+        </button>
+      </div>
     </div>
   );
 }

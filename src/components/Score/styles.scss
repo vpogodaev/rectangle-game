@@ -1,6 +1,7 @@
-.history {
-  width: 200px;
-  height: 100%;
+.score-wrapper {
+  width: calc(100% - 20px);
+  height: calc(100% - 20px);
+  padding: 10px;
   background-color: blanchedalmond;
   h2 {
     text-align: center;

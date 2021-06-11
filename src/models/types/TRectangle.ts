@@ -14,11 +14,12 @@ export default class TRectangle {
   ) {
     this.width = width;
     this.height = height;
-    this.corner = corner;
     this.player = player;
+    this.corner = corner;
     this.placed = placed;
     this.canBePlaced = false;
   }
+
   width: number;
   height: number;
   /** left upper corner */
@@ -26,6 +27,11 @@ export default class TRectangle {
   player: Players.PLAYER_1 | Players.PLAYER_2;
   placed: boolean;
   canBePlaced: boolean;
+
+  moveTo(point: IPoint) {
+    const { x, y } = point;
+    this.corner = { x, y };
+  }
 
   place(corner?: IPoint) {
     if (corner) {
@@ -41,5 +47,15 @@ export default class TRectangle {
     const tmp = this.width;
     this.width = this.height;
     this.height = tmp;
+  }
+
+  copy(): TRectangle {
+    return new TRectangle(
+      this.width,
+      this.height,
+      this.player,
+      this.corner,
+      this.placed
+    );
   }
 }

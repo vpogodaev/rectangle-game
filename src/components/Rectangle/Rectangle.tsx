@@ -20,7 +20,7 @@ export const Rectangle: React.FC<TRectangleProps> = ({
   const { width, height } = rectangle;
 
   let className = `rectangle rectangle_${rectangle.player} ${
-    rectangle.canBePlaced ? '' : 'rectangle_red'
+    rectangle.canBePlaced || rectangle.placed ? '' : 'rectangle_red'
   }`;
   const style = {
     width: width * square + (width - 1) * 2,

@@ -2,13 +2,13 @@ import { GameStatus, Players } from '../../models/common/enums';
 import { IScore } from '../../models/common/interfaces';
 import './styles.scss';
 
-declare type THistoryProps = {
+declare type TScoreProps = {
   gameStatus: GameStatus;
   curPlayer: Players;
   score: IScore;
 };
 
-export const History: React.FC<THistoryProps> = ({ gameStatus, curPlayer, score }) => {
+export const Score: React.FC<TScoreProps> = ({ gameStatus, curPlayer, score }) => {
   const headerStatus = {
     '0': 'Игра не начата',
     '1': 'Определение очередности',
@@ -24,7 +24,7 @@ export const History: React.FC<THistoryProps> = ({ gameStatus, curPlayer, score 
   }
 
   return (
-    <div className="history">
+    <div className="score-wrapper">
       <h2>{headerStatus[gameStatus]}</h2>
       <h3>Ходит {subHeaderPlayer[curPlayer]}</h3>
       Счет:

@@ -3,7 +3,7 @@ import Game from '../Game/Game';
 import './app.css';
 
 export default function App() {
-  return <Game width={24} height={20}/>;
+  return <Game width={8} height={8}/>;
 }
 // function App() {
 //   return (
