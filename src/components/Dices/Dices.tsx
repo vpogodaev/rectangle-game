@@ -8,13 +8,15 @@ declare type TDicesProps = {
   onDicesRolled: (dice1: DiceNum, dice2: DiceNum) => void;
 };
 
+const MAX_DOTS = 6;
+
 export const Dices: React.FC<TDicesProps> = ({ canRoll, onDicesRolled }) => {
   const [dice1, setDice1] = useState<DiceNum>(DiceNum._1);
   const [dice2, setDice2] = useState<DiceNum>(DiceNum._1);
   const [rerender, setRerender] = useState<0 | 1>(0);
 
   const randomDiceNum = (): DiceNum => {
-    const num: number = Math.floor(Math.random() * 6) + 1;
+    const num: number = Math.floor(Math.random() * MAX_DOTS) + 1;
     // @ts-ignore
     return DiceNum[`_${num}`];
   };

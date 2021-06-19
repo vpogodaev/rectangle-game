@@ -35,6 +35,7 @@ export const Cell: React.FC<TCellProps> = ({
       onClick={handleClick}
       onContextMenu={handleMouseRightClick}
     >
+      {/* test */}
       {/* {cell.point.x},{cell.point.y} */}
     </div>
   );

@@ -1,9 +1,10 @@
 import React from 'react';
 import Game from '../Game/Game';
-import './app.css';
+import './app.scss';
 
 export default function App() {
-  return <Game width={8} height={8}/>;
+  // max - 12x12
+  return <Game width={15} height={15}/>;
 }
 // function App() {
 //   return (

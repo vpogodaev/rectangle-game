@@ -1,3 +1,4 @@
+import { exception } from 'console';
 import { Players } from '../common/enums';
 import { IBox, IPoint } from '../common/interfaces';
 import TCell from './TCell';
@@ -106,8 +107,17 @@ export default class TField {
       }
     }
 
+    // Проверяем, что прямоугольник на пустых клетках
+    const rCells = this.getRectangleCells(rectangle);
+    if (rCells === -1 || rCells.some((c) => c.status !== Players.NONE)) {
+      return false;
+    }
+
     // Берем клетки вокруг прямоугольника, там дожен быть этот же игрок
-    const aroundCells: TCell[] = this.getCellsAroundRectangle(rectangle);
+    const aroundCells: TCell[] | -1 = this.getCellsAroundRectangle(rectangle);
+    if (aroundCells === -1) {
+      return false;
+    }
     if (aroundCells.some((c) => c.status === rectangle.player)) {
       return true;
     }
@@ -141,11 +151,24 @@ export default class TField {
     return false;
   };
 
+  getFreeCellsCount = () => {
+    let count = 0;
+    this.field.forEach((r) =>
+      r.forEach((c) => {
+        if (c.status === Players.NONE) {
+          count++;
+        }
+      })
+    );
+    return count;
+  };
+
   hasFieldSpaceForRectangle = (
     rectangle: TRectangle,
     isFirst: boolean
   ): boolean => {
-    const cellsToPlace: TCell[] = [];
+    // угловые клетки, которые подходят в первом приближении (т.е. без учета остальных)
+    const cellsToPlaceIn: TCell[] = [];
     const minHeight =
       rectangle.height < rectangle.width ? rectangle.height : rectangle.width;
     const minWidth =
@@ -154,17 +177,17 @@ export default class TField {
       if (row[0].point.y + minHeight > this.height) {
         return;
       }
-      cellsToPlace.push(
+      cellsToPlaceIn.push(
         ...row.filter(
-          (c) => c.status === Players.NONE && c.point.x + minWidth < this.width
+          (c) => c.status === Players.NONE && c.point.x + minWidth <= this.width
         )
       );
     });
 
     const check = (r: TRectangle): boolean => {
       // foreach не подходит, т.к. он не выходит из check'а
-      for (let i = 0; i < cellsToPlace.length; i++) {
-        r.moveTo(cellsToPlace[i].point);
+      for (let i = 0; i < cellsToPlaceIn.length; i++) {
+        r.moveTo(cellsToPlaceIn[i].point);
 
         if (this.canPlaceRectangle(r, isFirst)) {
           return true;
@@ -222,10 +245,12 @@ export default class TField {
     return true;
   }
 
-  private getCellsAroundRectangle(rectangle: TRectangle): TCell[] {
-    const recCells: Set<TCell> = new Set<TCell>(
-      this.getRectangleCells(rectangle)
-    );
+  private getCellsAroundRectangle(rectangle: TRectangle): TCell[] | -1 {
+    const r = this.getRectangleCells(rectangle);
+    if (r === -1) {
+      return -1;
+    }
+    const recCells: Set<TCell> = new Set<TCell>(r);
 
     const set: Set<TCell> = new Set<TCell>();
     recCells.forEach((recCell) => {
@@ -255,7 +280,7 @@ export default class TField {
     return Array.from(set.values());
   }
 
-  private getRectangleCells(rectangle: TRectangle): TCell[] {
+  private getRectangleCells(rectangle: TRectangle): TCell[] | -1 {
     if (!rectangle.corner) {
       return [];
     }
@@ -272,6 +297,10 @@ export default class TField {
       for (let j = x; j < (this.width > maxRW ? maxRW : this.width); j++) {
         cells[ind++] = this.field[i][j];
       }
+    }
+
+    if (ind !== width * height) {
+      return -1;
     }
 
     return cells;

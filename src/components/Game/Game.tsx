@@ -10,7 +10,10 @@ import { Score } from '../Score/Score';
 import { Rectangle } from '../Rectangle/Rectangle';
 import './styles.scss';
 
-// 1. Необходимо определить очередность
+declare interface IPasses {
+  player1: number;
+  player2: number;
+}
 
 export default function Game({
   width,
@@ -28,6 +31,7 @@ export default function Game({
   const [field, setField] = useState<TField>(new TField({ width, height }));
   const [curRectangle, setCurRectangle] = useState<TRectangle | null>(null);
   const [canPass, setCanPass] = useState<boolean>(false);
+  const [passes, setPasses] = useState<IPasses>({ player1: 0, player2: 0 });
 
   // Необходимо кинуть кубики для определения очередности
   useEffect(() => {
@@ -36,6 +40,19 @@ export default function Game({
     setGameStatus(GameStatus.PRIORITY_CHOOSE);
 
     // test
+    // const rects = [
+    //   new TRectangle(3, 5, Players.PLAYER_1, { x: 0, y: 0 }),
+    //   new TRectangle(4, 3, Players.PLAYER_2, { x: 4, y: 5 }),
+    //   new TRectangle(3, 1, Players.PLAYER_1, { x: 3, y: 0 }),
+    //   new TRectangle(1, 3, Players.PLAYER_2, { x: 5, y: 2 }),
+    // ];
+    // setRectangles(rects);
+    // field.placeRectangle(rects[0], true);
+    // field.placeRectangle(rects[1], true);
+    // rects.slice(2).forEach((r) => field.placeRectangle(r));
+    // setCurPlayer(Players.PLAYER_1);
+    // setGameStatus(GameStatus.DICE_ROLL);
+
     // const rects = [
     //   new TRectangle(2, 3, Players.PLAYER_1, { x: 0, y: 0 }),
     //   new TRectangle(2, 3, Players.PLAYER_2, { x: 0, y: 0 }),
@@ -52,6 +69,8 @@ export default function Game({
   }, []);
 
   useEffect(() => {
+    console.log('gameStatus', gameStatus);
+
     // если выбор очередности
     if (gameStatus === GameStatus.PRIORITY_CHOOSE) {
       if (score.player1 === 0 && score.player2 === 0) {
@@ -111,10 +130,21 @@ export default function Game({
       return;
     }
 
+    //ttest
+    //const rectangle = new TRectangle(5, 4, curPlayer);
     const rectangle = new TRectangle(dice1, dice2, curPlayer);
     setCurRectangle(rectangle);
     setGameStatus(GameStatus.RECTANGLE_PLACE);
-    if (field.hasFieldSpaceForRectangle(rectangle, rectangles.length < 2)) {
+
+    //ttest
+    const has = field.hasFieldSpaceForRectangle(
+      rectangle,
+      rectangles.length < 2
+    );
+    // console.log(`has place = ${has}`, rectangles.length);
+    // console.log(rectangle);
+
+    if (has) {
       setCanPass(false);
     } else {
       setCanPass(true);
@@ -159,13 +189,23 @@ export default function Game({
       setRectangles(newRectangles);
       setCurRectangle(null);
 
+      const newPasses = { ...passes };
+
       let { player1, player2 } = score;
       if (curPlayer === Players.PLAYER_1) {
         player1 += curRectangle.width * curRectangle.height;
+        newPasses.player1 = 0;
       } else {
         player2 += curRectangle.width * curRectangle.height;
+        newPasses.player2 = 0;
       }
+
+      setPasses(newPasses);
       setScore({ player1, player2 });
+    }
+
+    if (!field.getFreeCellsCount()) {
+      setGameStatus(GameStatus.FINISHED);
     }
   };
 
@@ -186,10 +226,23 @@ export default function Game({
   };
 
   const handlePassBtn = () => {
-    setCurPlayer(curPlayer === Players.PLAYER_1 ? Players.PLAYER_2 : Players.PLAYER_1);
+    if (gameStatus !== GameStatus.RECTANGLE_PLACE) {
+      return;
+    }
+    // setCurPlayer(
+    //   curPlayer === Players.PLAYER_1 ? Players.PLAYER_2 : Players.PLAYER_1
+    // );
+    if (curPlayer === Players.PLAYER_1) {
+      setCurPlayer(Players.PLAYER_2);
+      setPasses({ ...passes, player1: passes.player1 + 1 });
+    } else {
+      setCurPlayer(Players.PLAYER_1);
+      setPasses({ ...passes, player2: passes.player2 + 1 });
+    }
+
     setCurRectangle(null);
-    setGameStatus(GameStatus.DICE_ROLL)
     setCanPass(false);
+    setGameStatus(GameStatus.DICE_ROLL);
   };
 
   const drawRectangles = () => {
@@ -222,6 +275,14 @@ export default function Game({
       ? true
       : false;
 
+  const handleGiveUpBtn = () => {
+    setGameStatus(GameStatus.FINISHED);
+  };
+  const canGiveUp =
+    gameStatus === GameStatus.RECTANGLE_PLACE &&
+    ((curPlayer === Players.PLAYER_1 && passes.player1 > 1) ||
+      (curPlayer === Players.PLAYER_2 && passes.player2 > 1));
+
   // div-ы перед доской и костями для позиционирования в гриде
   // потом посмотреть, как сделать это нормально
   return (
@@ -238,9 +299,12 @@ export default function Game({
       <Score gameStatus={gameStatus} curPlayer={curPlayer} score={score} />
       <div></div>
       <Dices canRoll={canRoll} onDicesRolled={onDicesRolledHandler} />
-      <div className="pass-btn">
-        <button onClick={handlePassBtn} disabled={!canPass}>
+      <div className="btns">
+        <button className="btn" onClick={handlePassBtn} disabled={!canPass}>
           Pass
+        </button>
+        <button className="btn" onClick={handleGiveUpBtn} disabled={!canGiveUp}>
+          Give up
         </button>
       </div>
     </div>
