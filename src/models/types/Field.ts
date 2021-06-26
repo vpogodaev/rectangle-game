@@ -1,4 +1,4 @@
-import { exception } from 'console';
+import { action, makeObservable, observable } from 'mobx';
 import { Players } from '../common/enums';
 import { IBox, ICell, IPoint } from '../common/interfaces';
 //import TCell from './TCell';
@@ -9,12 +9,18 @@ export {};
 /**
  * Игровое поле
  */
-export default class TField {
+export default class Field {
   /**
    *
    * @param size Размеры поля
    */
   constructor(size: IBox) {
+    // т.к. тут почти все не нуждается в отслеживании, проще вручную
+    makeObservable(this, {
+      field: observable,
+      placeRectangle: action,
+    });
+
     this.width = size.width;
     this.height = size.height;
     this.field = this.initField();
@@ -151,12 +157,7 @@ export default class TField {
     //const tmpRectangle = { ...rectangle, roll: rectangle.roll };
     const tmpRectangle = rectangle.copy();
     tmpRectangle.roll();
-    if (
-      this.canMoveRectangleToPoint(
-        tmpRectangle,
-        tmpRectangle.corner
-      )
-    ) {
+    if (this.canMoveRectangleToPoint(tmpRectangle, tmpRectangle.corner)) {
       return true;
     }
 
@@ -165,6 +166,7 @@ export default class TField {
 
   /**
    * Получение количества незанятых клеток
+   * todo: нигде не используется, убрать
    * @returns Количество клеток
    */
   getFreeCellsCount = (): number => {
@@ -231,7 +233,7 @@ export default class TField {
   };
 
   /**
-   * Функция для расположения прямоугольника на поле. 
+   * Функция для расположения прямоугольника на поле.
    * Логика в отдельной функции, т.к. вызывается в обычном расположении и в расположении первого прямоугольника
    * @param rectangle Прямоугольник
    */
@@ -254,7 +256,7 @@ export default class TField {
 
   /**
    * Функция по расположению первого прямоугольника на поле. Первый прямоугольник -- особый случай, должен быть расположен в углу и не присоединен к другим.
-   * todo: 
+   * todo:
    *  1) пересмотреть - возможно метод не нужен, т.к. есть проверки первый-не первый, можно ли расположить и т.д.
    *  2) если оставляем, возможно необходимо переделывать проверки, т.к. тут отдельно расчитывается угол, в который ставится прямоугольник,
    *      т.е. можно хоть из центра его воткнуть, в этом методе всё равно пересчитаем угол для расположения

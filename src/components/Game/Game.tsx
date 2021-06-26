@@ -1,34 +1,33 @@
 import { useEffect, useState } from 'react';
 import { Players, GameStatus, DiceNum } from '../../models/common/enums';
-import { IScore } from '../../models/common/interfaces';
-import TCell from '../../models/types/TCell';
-import TField from '../../models/types/TField';
+import { IBox, ICell, IScore } from '../../models/common/interfaces';
+//import TCell from '../../models/types/TCell';
+import Field from '../../models/types/Field';
 import TRectangle from '../../models/types/TRectangle';
 import { Board } from '../Board/Board';
 import { Dices } from '../Dices/Dices';
 import { Score } from '../Score/Score';
 import { Rectangle } from '../Rectangle/Rectangle';
 import './styles.scss';
+import { observer } from 'mobx-react-lite';
+
+declare type TGameProps = {
+  size: IBox;
+};
 
 declare interface IPasses {
   player1: number;
   player2: number;
 }
 
-export default function Game({
-  width,
-  height,
-}: {
-  width: number;
-  height: number;
-}) {
+export const Game: React.FC<TGameProps> = observer(({ size }) => {
   const [curPlayer, setCurPlayer] = useState<Players>(Players.NONE);
   const [gameStatus, setGameStatus] = useState<GameStatus>(GameStatus.STOPPED); //useState<GameStatus>(GameStatus.STOPPED);
   const [score, setScore] = useState<IScore>({ player1: 0, player2: 0 });
   const [rectangles, setRectangles] = useState<TRectangle[]>(
     new Array<TRectangle>()
   );
-  const [field, setField] = useState<TField>(new TField({ width, height }));
+  const [field] = useState<Field>(new Field(size));
   const [curRectangle, setCurRectangle] = useState<TRectangle | null>(null);
   const [canPass, setCanPass] = useState<boolean>(false);
   const [passes, setPasses] = useState<IPasses>({ player1: 0, player2: 0 });
@@ -69,7 +68,7 @@ export default function Game({
   }, []);
 
   useEffect(() => {
-    console.log('gameStatus', gameStatus);
+    //console.log('gameStatus', gameStatus);
 
     // если выбор очередности
     if (gameStatus === GameStatus.PRIORITY_CHOOSE) {
@@ -151,7 +150,7 @@ export default function Game({
     }
   };
 
-  const handleMouseHoverCell = (cell: TCell) => {
+  const handleMouseHoverCell = (cell: ICell) => {
     if (gameStatus !== GameStatus.RECTANGLE_PLACE) {
       return;
     }
@@ -168,16 +167,15 @@ export default function Game({
       return;
     }
 
-    const newRectangles = rectangles.slice();
+    //const newRectangles = rectangles.slice();
     curRectangle.moveTo(cell.point);
-    curRectangle.canBePlaced = field.canPlaceRectangle(
-      curRectangle,
-      rectangles.length < 2
+    curRectangle.setCanBePlaced(
+      field.canPlaceRectangle(curRectangle, rectangles.length < 2)
     );
-    setRectangles(newRectangles);
+    //setRectangles(newRectangles);
   };
 
-  const handleMouseClickCell = (cell: TCell) => {
+  const handleMouseClickCell = (cell: ICell) => {
     if (!curRectangle) {
       return;
     }
@@ -209,7 +207,7 @@ export default function Game({
     }
   };
 
-  const handleMouseRightClickCell = (cell: TCell) => {
+  const handleMouseRightClickCell = (cell: ICell) => {
     if (!curRectangle) {
       return;
     }
@@ -309,4 +307,4 @@ export default function Game({
       </div>
     </div>
   );
-}
+});
