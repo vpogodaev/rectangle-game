@@ -19,3 +19,8 @@ export declare interface ICell {
   status: Players;
   point: IPoint;
 }
+
+export declare interface IPasses {
+  player1: number;
+  player2: number;
+}
