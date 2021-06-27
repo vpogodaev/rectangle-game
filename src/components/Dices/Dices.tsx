@@ -29,7 +29,7 @@ export const Dices: React.FC<TDicesProps> = ({
         onClick={rollBtnClickHandler}
         disabled={!canRoll}
       >
-        Roll
+        Бросить
       </button>
       <Dice diceNum={dices[1]} rerender={rerender} />
     </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { createContext } from 'react';
+import { IBox } from '../../models/common/interfaces';
 import GameStore from '../../strores/GameStore';
 import { Game } from '../Game/Game';
 import './app.scss';
@@ -10,9 +11,12 @@ export const StoreContext = createContext<GameStore>(
 
 export default function App() {
   // max - 12x12
+  const size: IBox = { width: 15, height: 15 }
+
   return (
-    <StoreContext.Provider value={new GameStore({ width: 15, height: 15 })}>
-      <Game size={{ width: 15, height: 15 }} />;
+    <StoreContext.Provider value={new GameStore(size)}>
+      {/* <Game size={size} />; */}
+      <Game />;
     </StoreContext.Provider>
   );
 }

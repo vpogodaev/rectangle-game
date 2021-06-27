@@ -1,8 +1,7 @@
 import { action, makeObservable, observable } from 'mobx';
 import { Players } from '../common/enums';
 import { IBox, ICell, IPoint } from '../common/interfaces';
-//import TCell from './TCell';
-import TRectangle from './TRectangle';
+import Rectangle from './Rectangle';
 
 export {};
 
@@ -39,7 +38,7 @@ export default class Field {
    * @param first Первый прямоугольник игрока или нет. TODO: это можно проверить и в самом классе, переделать
    * @returns true - если удалось расположить, false - если не удалось
    */
-  placeRectangle = (rectangle: TRectangle, first: boolean = false): boolean => {
+  placeRectangle = (rectangle: Rectangle, first: boolean = false): boolean => {
     // Особый сценарий для первого
     if (first) {
       return this.placeFirstRectangle(rectangle);
@@ -66,7 +65,7 @@ export default class Field {
    * @returns true - можно, false - нельзя
    */
   canPlaceRectangle = (
-    rectangle: TRectangle,
+    rectangle: Rectangle,
     first: boolean = false
   ): boolean => {
     // todo: потом поменять условие?
@@ -137,7 +136,7 @@ export default class Field {
    * @param point Точка, куда необходимо передвинуть
    * @returns true - можно, false - нельзя
    */
-  canMoveRectangleToPoint = (rectangle: TRectangle, point: IPoint): boolean => {
+  canMoveRectangleToPoint = (rectangle: Rectangle, point: IPoint): boolean => {
     const { width, height } = rectangle;
     const { x, y } = point;
 
@@ -152,7 +151,7 @@ export default class Field {
    * @param rectangle Прямоугольник
    * @returns true - можно, false - нельзя
    */
-  canRollRectangle = (rectangle: TRectangle): boolean => {
+  canRollRectangle = (rectangle: Rectangle): boolean => {
     // а можно копировать объект вместе со всеми методами?
     //const tmpRectangle = { ...rectangle, roll: rectangle.roll };
     const tmpRectangle = rectangle.copy();
@@ -188,8 +187,8 @@ export default class Field {
    * @returns true - можно, false - нельзя
    */
   hasFieldSpaceForRectangle = (
-    rectangle: TRectangle,
-    isFirst: boolean
+    rectangle: Rectangle,
+    isFirst: boolean = false
   ): boolean => {
     // угловые клетки, которые подходят в первом приближении (т.е. без учета остальных)
     const cellsToPlaceIn: ICell[] = [];
@@ -208,7 +207,7 @@ export default class Field {
       );
     });
 
-    const check = (r: TRectangle): boolean => {
+    const check = (r: Rectangle): boolean => {
       // foreach не подходит, т.к. он не выходит из check'а
       for (let i = 0; i < cellsToPlaceIn.length; i++) {
         r.moveTo(cellsToPlaceIn[i].point);
@@ -226,10 +225,7 @@ export default class Field {
       return true;
     }
     tmpRect.roll();
-    if (check(tmpRect)) {
-      return true;
-    }
-    return false;
+    return check(tmpRect);
   };
 
   /**
@@ -237,7 +233,7 @@ export default class Field {
    * Логика в отдельной функции, т.к. вызывается в обычном расположении и в расположении первого прямоугольника
    * @param rectangle Прямоугольник
    */
-  private _placeRectangle(rectangle: TRectangle) {
+  private _placeRectangle(rectangle: Rectangle) {
     const { x, y } = rectangle.corner!;
     const { width, height } = rectangle;
 
@@ -263,7 +259,7 @@ export default class Field {
    * @param rectangle Прямоугольник
    * @returns true - удалось расположить, false - не удалось todo: возможно стоит переделать на exception, т.к. возвращать что-то излишне
    */
-  private placeFirstRectangle(rectangle: TRectangle): boolean {
+  private placeFirstRectangle(rectangle: Rectangle): boolean {
     if (
       this.field.some((row) =>
         row.some((cell) => cell.status === rectangle.player)
@@ -290,7 +286,7 @@ export default class Field {
    * @param rectangle Прямоугольник
    * @returns Массив клеток | -1 - если не удалось получить прямоугольник
    */
-  private getCellsAroundRectangle(rectangle: TRectangle): ICell[] | -1 {
+  private getCellsAroundRectangle(rectangle: Rectangle): ICell[] | -1 {
     const r = this.getRectangleCells(rectangle);
     if (r === -1) {
       return -1;
@@ -330,7 +326,7 @@ export default class Field {
    * @param rectangle Прямоугольник
    * @returns Массив клеток прямоугольника | -1, если прямоугольник не может тут располагаться
    */
-  private getRectangleCells(rectangle: TRectangle): ICell[] | -1 {
+  private getRectangleCells(rectangle: Rectangle): ICell[] | -1 {
     if (!rectangle.corner) {
       return [];
     }

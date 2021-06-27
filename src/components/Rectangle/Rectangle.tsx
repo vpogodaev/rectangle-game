@@ -1,11 +1,11 @@
 import { observer } from 'mobx-react-lite';
 import React from 'react';
-import TRectangle from '../../models/types/TRectangle';
+import RectangleModel from '../../models/types/Rectangle';
 
 import './styles.scss';
 
 type TRectangleProps = {
-  rectangle: TRectangle;
+  rectangle: RectangleModel;
 };
 
 // todo: должно быть не тут (наверное)
