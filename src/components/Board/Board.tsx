@@ -1,14 +1,15 @@
-import TCell from '../../models/types/TCell';
-import TField from '../../models/types/TField';
+//import TCell from '../../models/types/TCell';
+import { ICell } from '../../models/common/interfaces';
+import Field from '../../models/types/Field';
 import { Cell } from '../Cell/Cell';
 import './styles.scss';
 
 type TBoardProps = {
   children?: React.ReactNode;
-  field: TField;
-  onMouseHoverCell: (cell: TCell) => void;
-  onMouseClickCell: (cell: TCell) => void;
-  onMouseRightClickCell: (cell: TCell) => void;
+  field: Field;
+  onMouseHoverCell: (cell: ICell) => void;
+  onMouseClickCell: (cell: ICell) => void;
+  onMouseRightClickCell: (cell: ICell) => void;
 };
 
 export const Board: React.FC<TBoardProps> = ({
@@ -22,13 +23,13 @@ export const Board: React.FC<TBoardProps> = ({
 
   const backGroundCells = new Array(width * height);
 
-  const handleMouseHoverCell = (cell: TCell) => {
+  const handleMouseHoverCell = (cell: ICell) => {
     onMouseHoverCell(cell);
   };
-  const handleMouseClickCell = (cell: TCell) => {
+  const handleMouseClickCell = (cell: ICell) => {
     onMouseClickCell(cell);
   };
-  const handleMouseRightClickCell = (cell: TCell) => {
+  const handleMouseRightClickCell = (cell: ICell) => {
     onMouseRightClickCell(cell);
   };
 

@@ -1,7 +1,9 @@
 import { Players } from '../common/enums';
 import { IPoint } from '../common/interfaces';
+import { action, makeObservable } from 'mobx';
+import { observable } from 'mobx';
 
-export default class TRectangle {
+export default class Rectangle {
   /**
    *
    */
@@ -12,6 +14,22 @@ export default class TRectangle {
     corner: IPoint = { x: 0, y: 0 },
     placed: boolean = false
   ) {
+    // можно исопльзовать makeAutoObservable(this)
+    // пока, чтобы разобраться, написал вручную
+    // todo: заменить на auto
+    makeObservable(this, {
+      width: observable,
+      height: observable,
+      player: observable,
+      corner: observable,
+      placed: observable,
+      canBePlaced: observable,
+      moveTo: action,
+      place: action,
+      roll: action,
+      setCanBePlaced: action,
+    });
+
     this.width = width;
     this.height = height;
     this.player = player;
@@ -49,8 +67,14 @@ export default class TRectangle {
     this.height = tmp;
   }
 
-  copy(): TRectangle {
-    return new TRectangle(
+  setCanBePlaced(can: boolean) {
+    if (this.canBePlaced !== can) {
+      this.canBePlaced = can;
+    }
+  }
+
+  copy(): Rectangle {
+    return new Rectangle(
       this.width,
       this.height,
       this.player,

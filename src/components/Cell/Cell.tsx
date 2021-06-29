@@ -1,12 +1,13 @@
 import React from 'react';
-import TCell from '../../models/types/TCell';
+import { ICell } from '../../models/common/interfaces';
+//import TCell from '../../models/types/TCell';
 import './styles.scss';
 
 type TCellProps = {
-  onMouseHover: (cell: TCell) => void;
-  onMouseClick: (cell: TCell) => void;
-  onMouseRightClickCell: (cell: TCell) => void;
-  cell: TCell;
+  onMouseHover: (cell: ICell) => void;
+  onMouseClick: (cell: ICell) => void;
+  onMouseRightClickCell: (cell: ICell) => void;
+  cell: ICell;
 };
 
 export const Cell: React.FC<TCellProps> = ({

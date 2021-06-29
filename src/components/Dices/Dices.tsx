@@ -4,39 +4,34 @@ import { Dice } from './Dice/Dice';
 import './styles.scss';
 
 declare type TDicesProps = {
+  dices: [DiceNum, DiceNum];
   canRoll: boolean;
-  onDicesRolled: (dice1: DiceNum, dice2: DiceNum) => void;
+  onDicesRolled: () => void;
 };
 
-const MAX_DOTS = 6;
-
-export const Dices: React.FC<TDicesProps> = ({ canRoll, onDicesRolled }) => {
-  const [dice1, setDice1] = useState<DiceNum>(DiceNum._1);
-  const [dice2, setDice2] = useState<DiceNum>(DiceNum._1);
+export const Dices: React.FC<TDicesProps> = ({
+  canRoll,
+  dices,
+  onDicesRolled,
+}) => {
   const [rerender, setRerender] = useState<0 | 1>(0);
 
-  const randomDiceNum = (): DiceNum => {
-    const num: number = Math.floor(Math.random() * MAX_DOTS) + 1;
-    // @ts-ignore
-    return DiceNum[`_${num}`];
-  };
-
   const rollBtnClickHandler = () => {
-    const newDice1 = randomDiceNum();
-    const newDice2 = randomDiceNum();
-    setDice1(newDice1);
-    setDice2(newDice2);
+    onDicesRolled();
     setRerender(rerender ? 0 : 1);
-    onDicesRolled(newDice1, newDice2);
   };
 
   return (
     <div className="dices-wrapper">
-      <Dice diceNum={dice1} rerender={rerender} />
-      <button className="roll-btn" onClick={rollBtnClickHandler} disabled={!canRoll}>
-        Roll
+      <Dice diceNum={dices[0]} rerender={rerender} />
+      <button
+        className="roll-btn"
+        onClick={rollBtnClickHandler}
+        disabled={!canRoll}
+      >
+        Бросить
       </button>
-      <Dice diceNum={dice2} rerender={rerender} />
+      <Dice diceNum={dices[1]} rerender={rerender} />
     </div>
   );
 };
